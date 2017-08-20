@@ -1,18 +1,18 @@
 import time
 import os
-from yaml import safe_dump, safe_load
+from ruamel.yaml import round_trip_dump, round_trip_load
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, FileModifiedEvent
 from subprocess import check_output
 
-WATCH_FILE = "./config.yaml"
-CONFIG_FILE = "./config.yaml"
+CONFIG_FILE = "/config/config.yaml"
 
-WATCH_FILE = os.path.realpath(WATCH_FILE)
+CONFIG_FILE = os.path.realpath(CONFIG_FILE)
 
 CONFIG_TEXT = """
-email: example@example.com
 webroot: /var/www
+status: ready
+email: example@example.com
 domains:
     - example.com
     - example2.com
@@ -23,15 +23,26 @@ CONFIG = {}
 def load_config():
 
     try:
-        temp = safe_load(open(CONFIG_FILE))
+        temp = round_trip_load(open(CONFIG_FILE))
         if "email" not in temp:
             raise
-    except:
+    except Exception as e:
+        print(e)
         with open(CONFIG_FILE, "w+") as fp:
             fp.write(CONFIG_TEXT)
             fp.seek(0)
-            temp = safe_load(fp)
+            temp = round_trip_load(fp)
     return temp
+
+def reset_config_status():
+    try:
+        conf = load_config()
+        conf['status'] = "updated"
+        with open(CONFIG_FILE, "w+") as fp:
+            round_trip_dump(conf, fp)
+        return True
+    except:
+        return False
 
 
 def get_certs_for_domains(domains):
@@ -41,25 +52,37 @@ def get_certs_for_domains(domains):
             webroot=CONFIG['webroot'],
             domain =domain
         )
-        check_output(cmd, shell=True)
+        print(cmd)
+        # check_output(cmd, shell=True)
+
+def ready_to_update():
+    try:
+        status = round_trip_load(open(CONFIG_FILE))['status']
+        return status.lower() == "ready"
+    except Exception as e:
+        print(e)
+        return False
 
 
 class Handler(FileSystemEventHandler):
     def on_any_event(self, event):
         global CONFIG
         if isinstance(event, FileModifiedEvent):
-            if WATCH_FILE == os.path.realpath(event.src_path):
-                print("{} modified.".format(event.src_path))
-                previous_domains = set(CONFIG['domains'])
-                CONFIG = load_config()
-                new_domains = set(CONFIG['domains'])
-                different_domains = [d for d in new_domains if d not in previous_domains]
-                get_certs_for_domains(different_domains)
+            if CONFIG_FILE == os.path.realpath(event.src_path):
+                if ready_to_update():
+                    print("{} modified.".format(event.src_path))
+                    previous_domains = set(CONFIG['domains'])
+                    CONFIG = load_config()
+                    new_domains = set(CONFIG['domains'])
+                    different_domains = [d for d in new_domains if d not in previous_domains]
+                    get_certs_for_domains(different_domains)
+                    reset_config_status()
 
 
 if __name__ == "__main__":
     CONFIG = load_config()
     get_certs_for_domains(CONFIG['domains'])
+    reset_config_status()
     event_handler = Handler()
     observer = Observer()
     observer.schedule(event_handler, ".", recursive=True)

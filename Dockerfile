@@ -1,8 +1,9 @@
-FROM    python:jessie
+FROM    python:alpine
 
-RUN     apt-get update && apt-get install -y letsencrypt; \
+RUN     apk update && apk add certbot gcc musl-dev; \
         mkdir /app; \
-        pip3 install watchdog PyYaml
+        pip3 install watchdog ruamel.yaml; \
+        apk del gcc
 
 
 
@@ -12,6 +13,9 @@ ENV     DOMAIN      example.com
 ENV     SUBDOMAINS  "www,ww3,sub"
 ENV     LE_EMAIL    "exmp@example.com"
 
-ENTRYPOINT bash -c "python3 le_watch.py;bash"
+VOLUME /config
+VOLUME /etc/letsencrypt/live
+
+ENTRYPOINT sh -c "python3 le_watch.py;sh"
 
 
