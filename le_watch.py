@@ -36,7 +36,10 @@ def get_certs_for_domains(subdomains):
     )
     for domain in domains:
         cmd += " -d " + domain
-        check_call(cmd, shell=True, stdout=sys.stdout)
+        try:
+            check_call(cmd, shell=True, stdout=sys.stdout)
+        except Exception as e:
+            print(e)
 
 
 
