@@ -9,9 +9,9 @@ RUN     apk update && apk add certbot gcc musl-dev; \
 
 WORKDIR /app
 ADD . .
-ENV     DOMAIN
-ENV     SUBDOMAINS
-ENV     EMAIL
+ENV     DOMAIN ""
+ENV     SUBDOMAINS ""
+ENV     EMAIL ""
 ENV     WEBROOT /webroot
 ENV     SUBDOMAINS_ONLY=false
 
