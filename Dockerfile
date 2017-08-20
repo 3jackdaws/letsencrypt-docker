@@ -18,6 +18,6 @@ ENV     SUBDOMAINS_ONLY=false
 VOLUME /keys
 VOLUME /webroot
 
-ENTRYPOINT sh -c "python3 le_watch.py;sh"
+ENTRYPOINT sh -c "python3 docker_events.py;sh"
 
 
