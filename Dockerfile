@@ -2,21 +2,18 @@ FROM    python:alpine
 
 RUN     apk update && apk add certbot gcc musl-dev; \
         mkdir /app; \
-        pip3 install watchdog ruamel.yaml; \
+        pip3 install docker-py; \
         apk del gcc
 
 
 
 WORKDIR /app
 ADD . .
-ENV     DOMAIN ""
-ENV     SUBDOMAINS ""
 ENV     EMAIL ""
-ENV     WEBROOT /webroot
-ENV     SUBDOMAINS_ONLY=false
 
 VOLUME /keys
 VOLUME /webroot
+VOLUME /var/run/docker.sock
 
 ENTRYPOINT sh -c "python3 docker_events.py;sh"
 
