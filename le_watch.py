@@ -38,9 +38,8 @@ def get_certs_for_domains(subdomains):
             webroot=webroot
     )
     for domain in domains:
-        cmd += " -d " + domain
         try:
-            check_call(cmd, shell=True, stdout=sys.stdout)
+            check_call(cmd + " -d " + domain, shell=True, stdout=sys.stdout)
 
         except Exception as e:
             print(e)
