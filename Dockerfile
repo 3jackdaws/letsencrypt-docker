@@ -9,9 +9,11 @@ RUN     apk update && apk add certbot gcc musl-dev; \
 
 WORKDIR /app
 ADD . .
-ENV     DOMAIN      example.com
-ENV     SUBDOMAINS  "www,ww3,sub"
-ENV     LE_EMAIL    "exmp@example.com"
+ENV     DOMAIN=
+ENV     SUBDOMAINS=
+ENV     EMAIL=
+ENV     WEBROOT=/var/www
+ENV     SUBDOMAINS_ONLY=false
 
 VOLUME /config
 VOLUME /etc/letsencrypt/live

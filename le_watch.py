@@ -1,6 +1,7 @@
 
 import os
-from subprocess import check_output
+from subprocess import check_call
+import sys
 
 ENVIRONMENT_VARIABLES = [
     "webroot",
@@ -22,19 +23,20 @@ def get_certs_for_domains(subdomains):
     webroot = ENV['webroot']
     domains = []
 
-    if ENV['subdomains_only'].lower() is not "true":
+    only_subdomains = ENV['subdomains_only']
+
+    if only_subdomains and only_subdomains != "true":
         domains.append(domain)
 
     for subdomain in subdomains:
         domains.append(subdomain + "." + domain)
-
-    for domain in domains:
-        cmd = "letsencrypt certonly --dry-run --webroot --agree-tos -m{email} -w{webroot} -d {domain}".format(
+    cmd = "letsencrypt certonly --webroot --agree-tos -m{email} -w{webroot}".format(
             email  =email,
-            webroot=webroot,
-            domain =domain
-        )
-        check_output(cmd, shell=True)
+            webroot=webroot
+    )
+    for domain in domains:
+        cmd += " -d " + domain
+        check_call(cmd, shell=True, stdout=sys.stdout)
 
 
 
