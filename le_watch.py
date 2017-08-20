@@ -2,6 +2,9 @@
 import os
 from subprocess import check_call
 import sys
+import shutil
+
+FINAL_KEY_DIR = "/keys"
 
 ENVIRONMENT_VARIABLES = [
     "webroot",
@@ -38,8 +41,12 @@ def get_certs_for_domains(subdomains):
         cmd += " -d " + domain
         try:
             check_call(cmd, shell=True, stdout=sys.stdout)
+
         except Exception as e:
             print(e)
+
+    for domain in domains:
+        shutil.copy2("/etc/letsencrypt/archive/" + domain, FINAL_KEY_DIR)
 
 
 
