@@ -14,6 +14,7 @@ ENV     EMAIL ""
 VOLUME /keys
 VOLUME /webroot
 VOLUME /var/run/docker.sock
+VOLUME /sites
 
 ENTRYPOINT sh -c "python3 docker_events.py;sh"
 

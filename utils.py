@@ -32,7 +32,7 @@ def write_site_config(server_name, ip, port=80):
 
 
 def get_cert(domain, email):
-    cmd = "letsencrypt certonly --webroot --agree-tos -m{email} -w{webroot} -d{domain}".format(
+    cmd = "letsencrypt certonly --webroot --test-cert --agree-tos -m{email} -w{webroot} -d{domain}".format(
         email=email,
         webroot=WEBROOT,
         domain=domain
@@ -46,11 +46,9 @@ def get_cert(domain, email):
 
 def move_cert(domain):
     final_dir = KEY_OUTPUT_DIR + "/" + domain
-    try:
+    if os.path.exists(final_dir):
         os.rmdir(final_dir)
-    except:
-        pass
-    check_call("cp -R {} {}".format("/etc/letsencrypt/archive/" + domain, final_dir))
+    check_call("cp -R {} {}".format("/etc/letsencrypt/archive/" + domain, final_dir), shell=True)
 
 
 
